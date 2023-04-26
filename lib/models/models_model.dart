@@ -1,4 +1,3 @@
-
 class ModelsModel {
   final String id;
   final int created;
@@ -10,14 +9,13 @@ class ModelsModel {
     required this.created,
   });
 
-  factory ModelsModel.fromJson(Map<String, dynamic> json ) => ModelsModel(
-        id: json["id"],
-        root: json["root"],
-        created: json["created"],
-      )  ;
+  factory ModelsModel.fromJson(Map<String, dynamic> json) => ModelsModel(
+    id: json["id"],
+    root: json["root"],
+    created: json["created"],
+  );
 
-  static List<ModelsModel> modelsFromSnapshot(List<ModelsModel> modelSnapshot) {
-    return modelSnapshot.map((data) => ModelsModel.fromJson(data as Map<String, dynamic>)).toList();
-    
+  static List<ModelsModel> modelsFromSnapshot(List modelSnapshot) {
+    return modelSnapshot.map((data) => ModelsModel.fromJson(data)).toList();
   }
 }

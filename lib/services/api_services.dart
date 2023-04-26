@@ -28,7 +28,7 @@ class ApiService {
         log("temp add: ${value["id"]}");
       }
 
-      return ModelsModel.modelsFromSnapshot(temp as List<ModelsModel>);
+      return ModelsModel.modelsFromSnapshot(temp);
 
       // print("jsonResponse $jsonResponse ");
       // return jsonResponse;
