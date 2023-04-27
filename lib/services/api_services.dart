@@ -87,6 +87,9 @@ class ApiService {
           )
         );
       }
+
+        log("jsonResponse[choices]text ${jsonResponse['choices'][0]['message']['content']}");
+
       return chatList;
 
 

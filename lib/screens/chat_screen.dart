@@ -10,7 +10,6 @@ import 'package:chatgpt_course/widgets/text_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:provider/provider.dart';
-
 import '../models/chat_model.dart';
 
 
@@ -26,16 +25,22 @@ class _ChatScreenState extends State<ChatScreen> {
   bool _isTyping = false;
 
   late TextEditingController textEditingController;
+  late ScrollController _listScrollController;
+  late FocusNode focusNode;
 
   @override
   void initState() {
+    _listScrollController = ScrollController();
     textEditingController = TextEditingController();
+    focusNode = FocusNode();
     super.initState();
   }
 
   @override
   void dispose() {
+    _listScrollController.dispose();
     textEditingController.dispose();
+    focusNode = FocusNode();
     super.dispose();
   }
 
@@ -68,6 +73,7 @@ class _ChatScreenState extends State<ChatScreen> {
           children: [
             Flexible(
               child: ListView.builder(
+                controller: _listScrollController,
                 itemCount: chatList.length,
                 itemBuilder: (context, index) {
                   return ChatWidget(
@@ -92,6 +98,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     children: [
                       Expanded(
                         child: TextField(
+                          focusNode: focusNode,
                           style: const TextStyle(color: Colors.white),
                           controller: textEditingController,
                           onSubmitted: (value) async {
@@ -126,18 +133,28 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
+  void scrollListenEND() {
+    _listScrollController.animateTo(
+      _listScrollController.position.maxScrollExtent,
+      duration: const Duration(seconds: 2),
+      curve: Curves.easeOut);    
+  }
+
   Future<void> sendMessageFCT ({
     required ModelsProvider modelsProvider
   }) async {
     try {
+      log("this is text to send: ${textEditingController.text}");
       setState(() {
         _isTyping = true;
         chatList.add(ChatModel(
             msg: textEditingController.text, 
             chatIndex: 0
           )
+          
         );
-        textEditingController.clear();
+        // textEditingController.clear();
+        //focusNode.unfocus();
       });
       chatList.addAll(
         await ApiService. sendMessage(
@@ -145,14 +162,19 @@ class _ChatScreenState extends State<ChatScreen> {
         modelId: modelsProvider.getCurrentModel 
       ));
       setState(() {
-        
+        textEditingController.clear();
+        focusNode.unfocus();
       });
+      log("this is text to send: ${chatList.first}");
+      
     } catch (error) {
       log("error $error");
     }finally{
         setState(() {
+          scrollListenEND();
         _isTyping = false;
       });
+
     }
   }
 
