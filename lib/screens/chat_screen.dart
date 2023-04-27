@@ -11,6 +11,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:provider/provider.dart';
 
+import '../models/chat_model.dart';
+
 
 
 class ChatScreen extends StatefulWidget {
@@ -36,6 +38,8 @@ class _ChatScreenState extends State<ChatScreen> {
     textEditingController.dispose();
     super.dispose();
   }
+
+  List<ChatModel> chatList = [];
 
   @override
   Widget build(BuildContext context) {
@@ -64,15 +68,13 @@ class _ChatScreenState extends State<ChatScreen> {
           children: [
             Flexible(
               child: ListView.builder(
-                itemCount: 6,
+                itemCount: chatList.length,
                 itemBuilder: (context, index) {
                   return ChatWidget(
-                    msg: chatMessages[index]["msg"].toString(),
-                    chatIndex: int.parse(
-                      chatMessages[index]["chatIndex"].toString()
-                    ),
+                    msg: chatList[index].msg,
+                    chatIndex: chatList[index].chatIndex
                   );
-                },                
+                },   
               )
             ),
             if (_isTyping) ...[
@@ -92,35 +94,23 @@ class _ChatScreenState extends State<ChatScreen> {
                         child: TextField(
                           style: const TextStyle(color: Colors.white),
                           controller: textEditingController,
-                          onSubmitted: (value) {
-                              
+                          onSubmitted: (value) async {
+                            await sendMessageFCT(
+                              modelsProvider: modelsProvider
+                            );
                           },
                           decoration: const InputDecoration.collapsed(
                             hintText: "How can I help you",
                             hintStyle: TextStyle(color: Colors.grey)
-                              
                           ),
-                              
                         ),
                       ),
                       IconButton(
                         onPressed: () async {
-                          try {
-                            setState(() {
-                              _isTyping = true;
-                            });
-                            await ApiService. sendMessage(
-                              message: textEditingController.text, 
-                              modelId: modelsProvider.getCurrentModel 
-                            );
-                          } catch (error) {
-                            log("error $error");
-                          }finally{
-                              setState(() {
-                              _isTyping = false;
-                            });
-                          }
-                        }, 
+                          await sendMessageFCT(
+                            modelsProvider: modelsProvider
+                          );
+                        },
                         icon: const Icon(
                           Icons.send,
                           color: Colors.white,
@@ -135,4 +125,28 @@ class _ChatScreenState extends State<ChatScreen> {
       ),
     );
   }
+
+  Future<void> sendMessageFCT ({
+    required ModelsProvider modelsProvider
+  }) async {
+    try {
+      setState(() {
+        _isTyping = true;
+      });
+      chatList = await ApiService. sendMessage(
+        message: textEditingController.text, 
+        modelId: modelsProvider.getCurrentModel 
+      );
+      setState(() {
+        
+      });
+    } catch (error) {
+      log("error $error");
+    }finally{
+        setState(() {
+        _isTyping = false;
+      });
+    }
+  }
+
 }
