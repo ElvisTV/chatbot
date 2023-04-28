@@ -50,6 +50,7 @@ class ApiService {
     ) async {
 
     try {
+      log("modelID $modelId");
       var response = await http.post(
         // Uri.parse("$BASE_URL/chat/completions"),
         Uri.parse("https://api.openai.com/v1/chat/completions"),
